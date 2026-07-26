@@ -8,10 +8,20 @@ const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 type TokenUser = {
   id: bigint;
+  name: string;
   email: string;
   active: boolean;
   userRoles: Array<{ role: { name: string } }>;
 };
+
+function serializeUser(user: TokenUser) {
+  return {
+    id: user.id.toString(),
+    name: user.name,
+    email: user.email,
+    roles: user.userRoles.map(({ role }) => role.name),
+  };
+}
 
 export function issueAccessToken(user: TokenUser): string {
   return createAccessToken({
@@ -86,7 +96,30 @@ export async function rotateRefreshToken(
   return {
     accessToken: issueAccessToken(storedToken.user),
     refreshToken,
+    user: serializeUser(storedToken.user),
   };
+}
+
+export async function getSession(token: string) {
+  const storedToken = await prisma.refreshToken.findFirst({
+    where: { tokenHash: hashToken(token) },
+    include: {
+      user: {
+        include: { userRoles: { include: { role: true } } },
+      },
+    },
+  });
+
+  if (
+    !storedToken ||
+    storedToken.revoked ||
+    storedToken.expiresAt <= new Date() ||
+    !storedToken.user.active
+  ) {
+    throw new HttpError(401, "Sessão inválida ou expirada.");
+  }
+
+  return serializeUser(storedToken.user);
 }
 
 export async function revokeRefreshToken(token: string): Promise<void> {
