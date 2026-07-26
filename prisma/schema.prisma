@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id            BigInt         @id @default(autoincrement())
+  companyId     BigInt         @map("company_id")
   name          String         @db.VarChar(120)
   email         String         @unique @db.VarChar(255)
   passwordHash  String         @map("password_hash")
@@ -16,10 +17,23 @@ model User {
   createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt     DateTime       @default(now()) @map("updated_at") @db.Timestamp(6)
   lastLogin     DateTime?      @map("last_login") @db.Timestamp(6)
+  company       Company        @relation(fields: [companyId], references: [id])
   refreshTokens RefreshToken[]
   userRoles     UserRole[]
 
+  @@index([companyId])
   @@map("users")
+}
+
+model Company {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @db.VarChar(120)
+  cnpj      String   @unique @db.VarChar(18)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
+  users     User[]
+
+  @@map("companies")
 }
 
 model RefreshToken {
