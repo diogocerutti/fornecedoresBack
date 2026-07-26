@@ -36,6 +36,31 @@ model Company {
   @@map("companies")
 }
 
+model Measure {
+  id           BigInt    @id @default(autoincrement())
+  name         String    @unique @db.VarChar(80)
+  abbreviation String    @unique @db.VarChar(20)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+  products     Product[]
+
+  @@map("measure")
+}
+
+model Product {
+  id          BigInt   @id @default(autoincrement())
+  name        String   @db.VarChar(160)
+  measureId   BigInt   @map("measure_id")
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
+  measure     Measure  @relation(fields: [measureId], references: [id])
+
+  @@index([measureId])
+  @@map("products")
+}
+
 model RefreshToken {
   id        BigInt   @id @default(autoincrement())
   userId    BigInt   @map("user_id")
