@@ -26,7 +26,7 @@ export function createRefreshTokenCookie(
   const parts = [
     `${REFRESH_TOKEN_COOKIE}=${encodeURIComponent(token)}`,
     "HttpOnly",
-    "Path=/api/auth",
+    "Path=/api",
     "SameSite=Lax",
   ];
 
@@ -37,11 +37,11 @@ export function createRefreshTokenCookie(
   return parts.join("; ");
 }
 
-export function clearRefreshTokenCookie(): string {
+function clearRefreshTokenCookieAtPath(path: string): string {
   const parts = [
     `${REFRESH_TOKEN_COOKIE}=`,
     "HttpOnly",
-    "Path=/api/auth",
+    `Path=${path}`,
     "SameSite=Lax",
     "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
   ];
@@ -49,4 +49,11 @@ export function clearRefreshTokenCookie(): string {
   if (env.NODE_ENV === "production") parts.push("Secure");
 
   return parts.join("; ");
+}
+
+export function clearRefreshTokenCookies(): string[] {
+  return [
+    clearRefreshTokenCookieAtPath("/api"),
+    clearRefreshTokenCookieAtPath("/api/auth"),
+  ];
 }

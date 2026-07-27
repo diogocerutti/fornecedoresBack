@@ -7,7 +7,7 @@ import {
   rotateRefreshToken,
 } from "../services/token.service.js";
 import {
-  clearRefreshTokenCookie,
+  clearRefreshTokenCookies,
   createRefreshTokenCookie,
   readCookie,
   REFRESH_TOKEN_COOKIE,
@@ -41,11 +41,14 @@ export async function loginController(request: Request, response: Response) {
 
   response.setHeader(
     "Set-Cookie",
-    createRefreshTokenCookie(
-      result.refreshToken.token,
-      result.refreshToken.expiresAt,
-      result.refreshToken.persistent,
-    ),
+    [
+      ...clearRefreshTokenCookies().slice(1),
+      createRefreshTokenCookie(
+        result.refreshToken.token,
+        result.refreshToken.expiresAt,
+        result.refreshToken.persistent,
+      ),
+    ],
   );
   response.status(200).json({
     accessToken: result.accessToken,
@@ -66,11 +69,14 @@ export async function refreshController(request: Request, response: Response) {
 
   response.setHeader(
     "Set-Cookie",
-    createRefreshTokenCookie(
-      result.refreshToken.token,
-      result.refreshToken.expiresAt,
-      result.refreshToken.persistent,
-    ),
+    [
+      ...clearRefreshTokenCookies().slice(1),
+      createRefreshTokenCookie(
+        result.refreshToken.token,
+        result.refreshToken.expiresAt,
+        result.refreshToken.persistent,
+      ),
+    ],
   );
   response.status(200).json({
     accessToken: result.accessToken,
@@ -91,6 +97,6 @@ export async function logoutController(request: Request, response: Response) {
   const token = readCookie(request.get("cookie"), REFRESH_TOKEN_COOKIE);
   if (token) await revokeRefreshToken(token);
 
-  response.setHeader("Set-Cookie", clearRefreshTokenCookie());
+  response.setHeader("Set-Cookie", clearRefreshTokenCookies());
   response.status(204).send();
 }
