@@ -4,6 +4,7 @@ import { prisma } from "./config/prisma.js";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { measureRouter } from "./routes/measure.routes.js";
+import { productRouter } from "./routes/product.routes.js";
 
 export const app = express();
 
@@ -53,6 +54,7 @@ app.get(
 
 app.use("/api/auth", authRouter);
 app.use("/api/measures", measureRouter);
+app.use("/api/products", productRouter);
 
 app.use((_request: Request, response: Response) => {
   response.status(404).json({ message: "Rota não encontrada." });
