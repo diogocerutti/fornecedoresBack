@@ -64,3 +64,13 @@ export async function createProduct(input: CreateProductInput) {
 
   return serializeProduct(product);
 }
+
+export async function deleteProduct(productId: bigint) {
+  const result = await prisma.product.deleteMany({
+    where: { id: productId },
+  });
+
+  if (result.count === 0) {
+    throw new HttpError(404, "Produto não encontrado.");
+  }
+}

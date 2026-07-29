@@ -20,7 +20,10 @@ app.use((request, response, next) => {
   }
 
   if (request.method === "OPTIONS") {
-    response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    response.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+    );
     response.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
     response.status(204).send();
     return;
