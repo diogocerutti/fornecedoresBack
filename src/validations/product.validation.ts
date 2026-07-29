@@ -4,6 +4,8 @@ export type CreateProductInput = {
   description?: string;
 };
 
+export type UpdateProductInput = CreateProductInput;
+
 export function parseCreateProductInput(body: unknown): CreateProductInput {
   if (!body || typeof body !== "object") {
     throw new Error("Informe os dados do produto.");
@@ -43,4 +45,22 @@ export function parseCreateProductInput(body: unknown): CreateProductInput {
     measureId,
     ...(description && { description }),
   };
+}
+
+export function parseUpdateProductInput(body: unknown): UpdateProductInput {
+  return parseCreateProductInput(body);
+}
+
+export function parseProductId(value: unknown) {
+  if (typeof value !== "string" || !/^\d+$/.test(value)) {
+    throw new Error("ID do produto inválido.");
+  }
+
+  const productId = BigInt(value);
+
+  if (productId < 1n) {
+    throw new Error("ID do produto inválido.");
+  }
+
+  return productId;
 }

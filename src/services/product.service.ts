@@ -1,6 +1,9 @@
 import { prisma } from "../config/prisma.js";
 import { HttpError } from "../middlewares/error.middleware.js";
-import type { CreateProductInput } from "../validations/product.validation.js";
+import type {
+  CreateProductInput,
+  UpdateProductInput,
+} from "../validations/product.validation.js";
 
 const productSelection = {
   id: true,
@@ -58,6 +61,36 @@ export async function createProduct(input: CreateProductInput) {
       name: input.name,
       measureId: input.measureId,
       description: input.description,
+    },
+    select: productSelection,
+  });
+
+  return serializeProduct(product);
+}
+
+export async function updateProduct(
+  productId: bigint,
+  input: UpdateProductInput,
+) {
+  const [productExists, measureExists] = await Promise.all([
+    prisma.product.count({ where: { id: productId } }),
+    prisma.measure.count({ where: { id: input.measureId } }),
+  ]);
+
+  if (!productExists) {
+    throw new HttpError(404, "Produto não encontrado.");
+  }
+
+  if (!measureExists) {
+    throw new HttpError(400, "Unidade de medida não encontrada.");
+  }
+
+  const product = await prisma.product.update({
+    where: { id: productId },
+    data: {
+      name: input.name,
+      measureId: input.measureId,
+      description: input.description ?? null,
     },
     select: productSelection,
   });
